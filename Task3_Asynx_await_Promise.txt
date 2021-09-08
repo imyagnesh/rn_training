@@ -1,0 +1,101 @@
+const p1=() => {
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        resolve ('P1 resolved')
+      },1500);
+    });
+  }
+  
+  const p2=() => {
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        reject ('P2 resolved')
+      },1000);
+    });
+  }
+  
+  const p3=() => {
+    return new Promise((resolve,reject) => {
+      setTimeout(() => {
+        resolve ('P3 resolved')
+      },2500);
+    });
+  }
+  
+  // Using Async & await
+  
+  const apicall = async () => {
+    try {
+      console.time('apicall');
+      const p1Res= await p1();
+      const p2Res= await p2();
+      const p3Res= await p2();
+      
+      console.log(p1Res);
+      console.log(p2Res);
+      console.log(p3Res);
+     console.timeEnd('api_call');
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }
+  
+// Using Async, await  & all
+  
+  const apicall = async () => {
+    try {
+      console.time('api_call');
+      const process = await Promise.all([
+        p1(),p2(),p3()])
+      console.log(process);
+     console.timeEnd('api_call');
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }
+
+// Using Async, await  & allsettled
+   const apicall = async () => {
+    try {
+      console.time('api_call');
+      const process = await Promise.allSettled([
+        p1(),p2(),p3()])
+      console.log(process);
+     console.timeEnd('api_call');
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }
+  
+// Using Async, await  & race
+   
+    const apicall = async () => {
+    try {
+      console.time('api_call');
+      const process = await Promise.race([
+        p1(),p2(),p3()])
+      console.log(process);
+     console.timeEnd('api_call');
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }
+  
+// Using Async, await  & any
+    
+     const apicall = async () => {
+    try {
+      console.time('api_call');
+      const process = await Promise.any([
+        p1(),p2(),p3()])
+      console.log(process);
+     console.timeEnd('api_call');
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }

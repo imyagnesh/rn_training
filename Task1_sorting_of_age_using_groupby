@@ -1,0 +1,40 @@
+var users = [{name: 'Yagnesh',
+              age: 33,
+              gender: 'male',},
+             {name: 'Virat',
+              age: 28,
+              gender: 'male'},
+             {name: 'Rohit',
+              age: 26,
+              gender: 'male'},
+             {name: 'Alia',
+              age: 19,
+              gender: 'female'},
+             {name: 'Deepika',
+              age: 34,
+              gender: 'female'},
+             {name: 'Priyanka',
+              age: 38,
+              gender: 'female'
+             }]
+
+const groupBy = users.reduce((pa,ca ) => {
+  
+var agekey = Math.floor(ca.age/10);
+var key = `${agekey}0-${agekey}9`;
+(pa[key] = pa[key]||[]).push(ca) 
+pa[key].sort(
+    function(a, b) {
+       return a.age - b.age
+    }
+);
+return pa;
+},{});
+console.log(groupBy);
+
+
+O/P:
+
+{ "30-39": [ { "name": "Yagnesh", "age": 33, "gender": "male" }, { "name": "Deepika", "age": 34, "gender": "female" }, { "name": "Priyanka", "age": 38, "gender": "female" } ],
+ "20-29": [ { "name": "Rohit", "age": 26, "gender": "male" }, { "name": "Virat", "age": 28, "gender": "male" } ],
+ "10-19": [ { "name": "Alia", "age": 19, "gender": "female" } ] }
