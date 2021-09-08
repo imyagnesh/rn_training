@@ -30,13 +30,7 @@ const users = [
     gender: 'female',
     }
     ]
-
-    const reduceEvery = users.reduce((p,c)=>{
-        //Checking all are male
-if(!(c.gender==='male')){
-    return false;
-}
-return p;
-    }, true);
+//Checking all are male
+    const reduceEvery = users.reduce((p,c)=>(c.gender==='male' && p), true);
 
     console.log(reduceEvery);

@@ -76,4 +76,4 @@ console.log(err);
 syncAll();
 syncAllSettled();
 syncRace();
-//syncAny();
+syncAny();
