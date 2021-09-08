@@ -1,0 +1,34 @@
+{
+  "name": "rn_training",
+  "version": "0.0.1",
+  "description": "React Native",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack serve",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SRKPravinSR/rn_training.git"
+  },
+  "keywords": [
+    "react",
+    "native"
+  ],
+  "author": "Pravin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SRKPravinSR/rn_training/issues"
+  },
+  "homepage": "https://github.com/SRKPravinSR/rn_training#readme",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.4",
+    "babel-loader": "^8.2.2",
+    "html-webpack-plugin": "^5.3.2",
+    "webpack": "^5.52.0",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.1.1"
+  }
+}
