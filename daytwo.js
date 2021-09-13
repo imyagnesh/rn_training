@@ -2,7 +2,7 @@ const users = [
 
 {
 
-name: 'Yagnesh',
+name: 'Yagneshs',
 
 age: 33,
 
