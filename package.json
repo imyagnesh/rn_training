@@ -14,19 +14,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imyagnesh/rn_training.git"
+    "url": "git+https://github.com/SRKPravinSR/rn_training.git"
   },
   "keywords": [
     "javascript",
     "react",
     "react-native"
   ],
-  "author": "Yagnesh Modh (yagnesh.modh@gmail.com)",
+  "author": "Pravin",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/imyagnesh/rn_training/issues"
+    "url": "https://github.com/SRKPravinSR/rn_training/issues"
   },
-  "homepage": "https://github.com/imyagnesh/rn_training#readme",
+  "homepage": "https://github.com/SRKPravinSR/rn_training#readme",
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/eslint-parser": "^7.15.4",
