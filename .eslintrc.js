@@ -15,6 +15,7 @@ module.exports = {
   },
   plugins: ['react'],
   rules: {
+    'linebreak-style': 0,
     'arrow-parens': 0,
 
     'react/jsx-filename-extension': [
