@@ -17,9 +17,6 @@ class App extends PureComponent {
           ...todoList,
           {
             id: new Date().valueOf(),
-            text: this.todoInputRef.current.value,
-            isDone: false,
-          },
         ],
       }),
       () => {
@@ -30,9 +27,7 @@ class App extends PureComponent {
 
   toggleCompleteTodo = item => {
     const { todoList } = this.state;
-
     const index = todoList.findIndex(x => x.id === item.id);
-
     this.setState(state => ({
       todoList: [
         ...state.todoList.slice(0, index),
@@ -45,7 +40,6 @@ class App extends PureComponent {
   render() {
     const { todoList } = this.state;
     console.log('render method');
-
     return (
       <div className="container">
         <h1>Todo App</h1>
