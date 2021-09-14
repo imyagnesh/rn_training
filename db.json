@@ -6,9 +6,14 @@
       "id": 1
     },
     {
-      "text": "assdfas",
-      "isDone": true,
-      "id": 2
+      "text": "learn react native",
+      "isDone": false,
+      "id": 3
+    },
+    {
+      "text": "learn flutter",
+      "isDone": false,
+      "id": 4
     }
   ],
   "weather": [

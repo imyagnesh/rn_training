@@ -205,16 +205,16 @@ class App extends PureComponent {
         {status.some(
           x => x.status === 'fetch_todo_request',
         ) ? (
-          <h1>Loading Record...</h1>
-        ) : (
-          <TodoList
-            status={status}
-            todoList={todoList}
-            filterType={filterType}
-            toggleCompleteTodo={this.toggleCompleteTodo}
-            deleteTodo={this.deleteTodo}
-          />
-        )}
+            <h1>Loading Record...</h1>
+          ) : (
+            <TodoList
+              status={status}
+              todoList={todoList}
+              filterType={filterType}
+              toggleCompleteTodo={this.toggleCompleteTodo}
+              deleteTodo={this.deleteTodo}
+            />
+          )}
 
         <TodoFilter
           filterType={filterType}
