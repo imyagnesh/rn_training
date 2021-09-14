@@ -4,16 +4,26 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: './index.js',
   output: {
-    path: path.resolve(__dirname, 'bundle'),
-    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.js',
   },
-  mode: 'production',
+  mode: 'development',
+  resolve: {
+    alias: {
+      'react-dom$': 'react-dom/profiling',
+    },
+  },
   module: {
     rules: [
       {
-        test: /\.m?js$/,
+        test: /\.js$/i,
         exclude: /node_modules/,
         use: 'babel-loader',
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        exclude: /node_modules/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
     ],
   },
