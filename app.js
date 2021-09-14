@@ -1,88 +1,152 @@
 import React, { PureComponent, createRef } from 'react';
 import './app.scss';
+import TodoFilter from './todo/todoFilter';
+import TodoForm from './todo/todoForm';
+import TodoList from './todo/todoList';
 
 class App extends PureComponent {
   todoInputRef = createRef(null);
 
   state = {
     todoList: [],
+    filterType: 'all',
+    hasError: false,
   };
 
-  componentDidMount() {}
+  componentDidMount = async () => {
+    try {
+      const res = await fetch(
+        'http://localhost:3000/todoList',
+      );
+      const json = await res.json();
+      console.log('res', res);
+      console.log('json', json);
+      this.setState({
+        todoList: json,
+      });
+    } catch (error) {
+      this.setState({
+        hasError: true,
+      });
+      console.log(error);
+    }
+  };
 
-  addTodo = () => {
-    this.setState(
-      ({ todoList }) => ({
-        todoList: [
-          ...todoList,
-          {
-            id: new Date().valueOf(),
+  addTodo = async () => {
+    try {
+      const res = await fetch(
+        'http://localhost:3000/todoList',
+        {
+          method: 'POST',
+          body: JSON.stringify({
             text: this.todoInputRef.current.value,
             isDone: false,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
           },
-        ],
-      }),
-      () => {
-        this.todoInputRef.current.value = '';
-      },
-    );
+        },
+      );
+
+      const json = await res.json();
+
+      this.setState(
+        ({ todoList }) => ({
+          todoList: [...todoList, json],
+          filterType: 'all',
+        }),
+        () => {
+          this.todoInputRef.current.value = '';
+        },
+      );
+    } catch (error) {
+      this.setState({
+        hasError: true,
+      });
+    }
   };
 
-  toggleCompleteTodo = item => {
-    const { todoList } = this.state;
+  toggleCompleteTodo = async item => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/todoList/${item.id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            ...item,
+            isDone: !item.isDone,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        },
+      );
 
-    const index = todoList.findIndex(x => x.id === item.id);
+      const json = await res.json();
 
-    this.setState(state => ({
-      todoList: [
-        ...state.todoList.slice(0, index),
-        { ...item, isDone: !item.isDone },
-        ...state.todoList.slice(index + 1),
-      ],
+      const { todoList } = this.state;
+
+      const index = todoList.findIndex(
+        x => x.id === item.id,
+      );
+
+      this.setState(state => ({
+        todoList: [
+          ...state.todoList.slice(0, index),
+          json,
+          ...state.todoList.slice(index + 1),
+        ],
+      }));
+    } catch (error) {
+      console.log(error);
+      this.setState({
+        hasError: true,
+      });
+    }
+  };
+
+  deleteTodo = item => {
+    this.setState(({ todoList }) => ({
+      todoList: todoList.filter(x => x.id !== item.id),
     }));
   };
 
+  filterTodo = event => {
+    this.setState({
+      filterType: event.target.name,
+    });
+  };
+
   render() {
-    const { todoList } = this.state;
-    console.log('render method');
+    const { todoList, filterType, hasError } = this.state;
+
+    if (hasError) {
+      return (
+        <h1>
+          Server is down. Please try after sometime...
+        </h1>
+      );
+    }
 
     return (
       <div className="container">
         <h1>Todo App</h1>
-        <div className="todo-form">
-          <input type="text" ref={this.todoInputRef} />
-          <button type="button" onClick={this.addTodo}>
-            Add Todo
-          </button>
-        </div>
-        <div className="todo-list-wrapper">
-          {todoList.map(item => (
-            <div key={item.id} className="todo-list">
-              <input
-                type="checkbox"
-                name="isDone"
-                checked={item.isDone}
-                onChange={() =>
-                  this.toggleCompleteTodo(item)
-                }
-              />
-              <span
-                style={{
-                  textDecoration: item.isDone
-                    ? 'line-through'
-                    : 'none',
-                }}>
-                {item.text}
-              </span>
-              <button type="button">Delete</button>
-            </div>
-          ))}
-        </div>
-        <div className="todo-fliter">
-          <button type="button">All</button>
-          <button type="button">Pending</button>
-          <button type="button">Completed</button>
-        </div>
+        <TodoForm
+          ref={this.todoInputRef}
+          addTodo={this.addTodo}
+        />
+        <TodoList
+          todoList={todoList}
+          filterType={filterType}
+          toggleCompleteTodo={this.toggleCompleteTodo}
+          deleteTodo={this.deleteTodo}
+        />
+        <TodoFilter
+          filterType={filterType}
+          filterTodo={this.filterTodo}
+        />
       </div>
     );
   }
