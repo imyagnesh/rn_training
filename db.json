@@ -1,9 +1,36 @@
 {
   "todoList": [
     {
-      "text": "Test",
+      "text": "learn react",
       "isDone": true,
-      "id": 4
+      "id": 1
+    },
+    {
+      "text": "assdfas",
+      "isDone": true,
+      "id": 2
+    }
+  ],
+  "weather": [
+    {
+      "id": 1,
+      "city": "ahmedabad",
+      "temp": 25
+    },
+    {
+      "id": 1,
+      "city": "ahmed nagar",
+      "temp": 28
+    },
+    {
+      "id": 1,
+      "city": "pune",
+      "temp": 20
+    },
+    {
+      "id": 1,
+      "city": "bangluru",
+      "temp": 18
     }
   ]
 }

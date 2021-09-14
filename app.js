@@ -17,7 +17,10 @@ class App extends PureComponent {
           ...todoList,
           {
             id: new Date().valueOf(),
-        ],
+            text: this.todoInputRef.current.value,
+            isDone: false,
+          },
+        ]
       }),
       () => {
         this.todoInputRef.current.value = '';
