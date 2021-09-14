@@ -6,6 +6,7 @@ const TodoList = ({
   filterType,
   toggleCompleteTodo,
   deleteTodo,
+  status,
 }) => (
   <div className="todo-list-wrapper">
     {todoList
@@ -27,6 +28,11 @@ const TodoList = ({
             type="checkbox"
             name="isDone"
             checked={item.isDone}
+            disabled={status.some(
+              x =>
+                x.status === 'update_todo_request' &&
+                x.id === item.id,
+            )}
             onChange={() => toggleCompleteTodo(item)}
           />
           <span
@@ -39,6 +45,11 @@ const TodoList = ({
           </span>
           <button
             type="button"
+            disabled={status.some(
+              x =>
+                x.status === 'delete_todo_request' &&
+                x.id === item.id,
+            )}
             onClick={() => deleteTodo(item)}>
             Delete
           </button>
@@ -58,6 +69,12 @@ TodoList.propTypes = {
   filterType: PropTypes.string.isRequired,
   toggleCompleteTodo: PropTypes.func.isRequired,
   deleteTodo: PropTypes.func.isRequired,
+  status: PropTypes.arrayOf(
+    PropTypes.shape({
+      status: PropTypes.string.isRequired,
+      id: PropTypes.number,
+    }),
+  ).isRequired,
 };
 
 export default memo(TodoList);
