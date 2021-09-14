@@ -1,10 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-// ToDo App
-// import App from './app';
-
-// Weather App
-import App from './weatherApp';
+import App from './app';
 
 ReactDOM.render(<App />, document.getElementById('root'));
