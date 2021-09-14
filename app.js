@@ -10,32 +10,83 @@ class App extends PureComponent {
   state = {
     todoList: [],
     filterType: 'all',
-    hasError: false,
+    status: [],
+  };
+
+  setApiRequest = (requestType, id) => {
+    this.setState(({ status }) => ({
+      status: [
+        ...status,
+        { status: `${requestType}_request`, id },
+      ],
+    }));
+  };
+
+  setApiResponse = (requestType, type, id) => {
+    this.setState(({ status }) => {
+      const index = status.findIndex(x => {
+        const [, requestName] =
+          /(.*)_(request|success|fail)/.exec(x.status);
+        if (id) {
+          return requestName === requestType && x.id === id;
+        }
+        return requestName === requestType;
+      });
+      return {
+        status: [
+          ...status.slice(0, index),
+          { status: `${requestType}_${type}` },
+          ...status.slice(index + 1),
+        ],
+      };
+    });
+  };
+
+  setIdle = (requestType, id) => {
+    this.setState(({ status }) => {
+      const index = status.findIndex(x => {
+        const [, requestName] =
+          /(.*)_(request|success|fail)/.exec(x.status);
+        if (id) {
+          return requestName === requestType && x.id === id;
+        }
+        return requestName === requestType;
+      });
+      return {
+        status: [
+          ...status.slice(0, index),
+          ...status.slice(index + 1),
+        ],
+      };
+    });
   };
 
   componentDidMount = async () => {
+    const requestType = 'fetch_todo';
     try {
+      this.setApiRequest(requestType);
+
       const res = await fetch(
-        'https://e43c-117-99-103-96.ngrok.io/todoList',
+        'http://localhost:3000/todoList',
       );
       const json = await res.json();
-      console.log('res', res);
-      console.log('json', json);
       this.setState({
         todoList: json,
       });
+      this.setApiResponse(requestType, 'success');
     } catch (error) {
-      this.setState({
-        hasError: true,
-      });
-      console.log(error);
+      this.setApiResponse(requestType, 'fail');
+    } finally {
+      this.setIdle(requestType);
     }
   };
 
   addTodo = async () => {
+    const requestType = 'add_todo';
     try {
+      this.setApiRequest(requestType);
       const res = await fetch(
-        'https://e43c-117-99-103-96.ngrok.io/todoList',
+        'http://localhost:3000/todoList',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -55,22 +106,27 @@ class App extends PureComponent {
         ({ todoList }) => ({
           todoList: [...todoList, json],
           filterType: 'all',
+          loading: false,
         }),
         () => {
           this.todoInputRef.current.value = '';
         },
       );
+
+      this.setApiResponse(requestType, 'success');
     } catch (error) {
-      this.setState({
-        hasError: true,
-      });
+      this.setApiResponse(requestType, 'fail');
+    } finally {
+      this.setIdle(requestType);
     }
   };
 
   toggleCompleteTodo = async item => {
+    const requestType = 'update_todo';
     try {
+      this.setApiRequest(requestType, item.id);
       const res = await fetch(
-        `https://e43c-117-99-103-96.ngrok.io/todoList/${item.id}`,
+        `http://localhost:3000/todoList/${item.id}`,
         {
           method: 'PUT',
           body: JSON.stringify({
@@ -98,19 +154,35 @@ class App extends PureComponent {
           json,
           ...state.todoList.slice(index + 1),
         ],
+        loading: false,
       }));
+      this.setApiResponse(requestType, 'success', item.id);
     } catch (error) {
-      console.log(error);
-      this.setState({
-        hasError: true,
-      });
+      this.setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      this.setIdle(requestType, item.id);
     }
   };
 
-  deleteTodo = item => {
-    this.setState(({ todoList }) => ({
-      todoList: todoList.filter(x => x.id !== item.id),
-    }));
+  deleteTodo = async item => {
+    const requestType = 'delete_todo';
+    try {
+      this.setApiRequest(requestType, item.id);
+      await fetch(
+        `http://localhost:3000/todoList/${item.id}`,
+        {
+          method: 'DELETE',
+        },
+      );
+      this.setState(({ todoList }) => ({
+        todoList: todoList.filter(x => x.id !== item.id),
+      }));
+      this.setApiResponse(requestType, 'success', item.id);
+    } catch (error) {
+      this.setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      this.setIdle(requestType, item.id);
+    }
   };
 
   filterTodo = event => {
@@ -120,29 +192,30 @@ class App extends PureComponent {
   };
 
   render() {
-    const { todoList, filterType, hasError } = this.state;
-
-    if (hasError) {
-      return (
-        <h1>
-          Server is down. Please try after sometime...
-        </h1>
-      );
-    }
+    const { todoList, filterType, status } = this.state;
 
     return (
       <div className="container">
         <h1>Todo App</h1>
         <TodoForm
+          status={status}
           ref={this.todoInputRef}
           addTodo={this.addTodo}
         />
-        <TodoList
-          todoList={todoList}
-          filterType={filterType}
-          toggleCompleteTodo={this.toggleCompleteTodo}
-          deleteTodo={this.deleteTodo}
-        />
+        {status.some(
+          x => x.status === 'fetch_todo_request',
+        ) ? (
+            <h1>Loading Record...</h1>
+          ) : (
+            <TodoList
+              status={status}
+              todoList={todoList}
+              filterType={filterType}
+              toggleCompleteTodo={this.toggleCompleteTodo}
+              deleteTodo={this.deleteTodo}
+            />
+          )}
+
         <TodoFilter
           filterType={filterType}
           filterTodo={this.filterTodo}

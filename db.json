@@ -1,19 +1,41 @@
 {
   "todoList": [
     {
-      "id": 1,
-      "text": "Get Milk",
-      "isDone": false
-    },
-    {
-      "text": "Learn react",
+      "text": "learn react",
       "isDone": true,
-      "id": 2
+      "id": 1
     },
     {
       "text": "learn react native",
       "isDone": false,
       "id": 3
+    },
+    {
+      "text": "learn flutter",
+      "isDone": false,
+      "id": 4
+    }
+  ],
+  "weather": [
+    {
+      "id": 1,
+      "city": "ahmedabad",
+      "temp": 25
+    },
+    {
+      "id": 1,
+      "city": "ahmed nagar",
+      "temp": 28
+    },
+    {
+      "id": 1,
+      "city": "pune",
+      "temp": 20
+    },
+    {
+      "id": 1,
+      "city": "bangluru",
+      "temp": 18
     }
   ]
 }

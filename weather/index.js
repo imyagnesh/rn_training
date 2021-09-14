@@ -1,26 +1,58 @@
 import React, { PureComponent } from 'react';
 
 class WeatherApp extends PureComponent {
+  // token = null;
   state = {
-    cities: [
-      {
-        name: 'ahmedabad',
-        temp: 38,
-      },
-      {
-        name: 'pune',
-        temp: 30,
-      },
-    ],
+    city: "",
+    weather: []
+  };
+
+  onChange = e => {
+    const { value } = e.target;
+    this.setState({
+      filter: value
+    });
+
+    this.search(value);
+  };
+
+
+
+  componentDidMount = async () => {
+    try {
+      const res = await fetch(
+        'http://localhost:3000/weather',
+      );
+      const json = await res.json();
+      console.log('res', res);
+      console.log('json', json);
+      this.setState({
+        weather: json,
+      });
+    } catch (error) {
+      this.setState({
+        hasError: true,
+      });
+      console.log(error);
+    }
   };
 
   render() {
+    const { filter } = this.state;
     return (
-      <div>
-        <h1>Weather App</h1>
-      </div>
+      <form>
+        <input
+          type="text"
+          value={filter}
+          onChange={this.onChange}
+        />
+        {this.state.weather.map(weather => (
+          <ul key={weather.city}>
+            <li>{weather.city}</li>
+          </ul>
+        ))}
+      </form>
     );
   }
 }
-
 export default WeatherApp;
