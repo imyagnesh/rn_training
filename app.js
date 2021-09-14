@@ -8,7 +8,7 @@ class App extends PureComponent {
     todoList: [],
   };
 
-  componentDidMount() {}
+  componentDidMount() { }
 
   addTodo = () => {
     this.setState(
