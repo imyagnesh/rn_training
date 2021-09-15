@@ -33,8 +33,7 @@ const App = ({ initCounter }) => {
   const setApiResponse = (requestType, type, id) => {
     setStatus(val => {
       const index = val.findIndex(x => {
-        const [, requestName] =
-          /(.*)_(request|success|fail)/.exec(x.status);
+        const [, requestName] = /(.*)_(request|success|fail)/.exec(x.status);
         if (id) {
           return requestName === requestType && x.id === id;
         }
@@ -51,8 +50,7 @@ const App = ({ initCounter }) => {
   const setIdle = (requestType, id) => {
     setStatus(val => {
       const index = val.findIndex(x => {
-        const [, requestName] =
-          /(.*)_(request|success|fail)/.exec(x.status);
+        const [, requestName] = /(.*)_(request|success|fail)/.exec(x.status);
         if (id) {
           return requestName === requestType && x.id === id;
         }
@@ -117,9 +115,47 @@ const App = ({ initCounter }) => {
     }
   };
 
-  const toggleCompleteTodo = async () => {};
+  const toggleCompleteTodo = async (item) => {
+    const requestType = 'update_todo';
+    try {
+      setApiRequest(requestType, item.id);
+      const res = await axiosInstance.put(
+        `todoList/${item.id}`,
+        {
+          ...item,
+          isDone: !item.isDone,
+        },
+      );
 
-  const deleteTodo = async () => {};
+      const index = todoList.findIndex(
+        x => x.id === item.id,
+      );
+      setTodoList((val) => [
+        ...val.slice(0, index),
+        res,
+        ...val.slice(index + 1),
+      ]);
+      setApiResponse(requestType, 'success', item.id);
+    } catch (error) {
+      setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      setIdle(requestType, item.id);
+    }
+  };
+
+  const deleteTodo = async (item) => {
+    const requestType = 'delete_todo';
+    try {
+      setApiRequest(requestType, item.id);
+      await axiosInstance.delete(`todoList/${item.id}`);
+      setTodoList(val=>val.filter(x => x.id !== item.id));
+      setApiResponse(requestType, 'success', item.id);
+    } catch (error) {
+      setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      setIdle(requestType, item.id);
+    }
+  };
 
   const pagination = async () => {};
 
@@ -137,29 +173,29 @@ const App = ({ initCounter }) => {
         x => x.status === 'fetch_todo_request',
       ) ? (
         <h1>Loading Record...</h1>
-      ) : (
-        <div style={{ width: '100%', flex: 1 }}>
-          <button
-            type="button"
-            name="previous"
-            onClick={pagination}>
-            Prev
-          </button>
-          <button
-            type="button"
-            name="next"
-            onClick={pagination}>
-            Next
-          </button>
-          <TodoList
-            status={status}
-            todoList={todoList}
-            filterType={filterType}
-            toggleCompleteTodo={toggleCompleteTodo}
-            deleteTodo={deleteTodo}
+        ) : (
+          <div style={{ width: '100%', flex: 1 }}>
+            <button
+              type="button"
+              name="previous"
+              onClick={pagination}>
+              Prev
+            </button>
+            <button
+              type="button"
+              name="next"
+              onClick={pagination}>
+              Next
+            </button>
+            <TodoList
+              status={status}
+              todoList={todoList}
+              filterType={filterType}
+              toggleCompleteTodo={toggleCompleteTodo}
+              deleteTodo={deleteTodo}
           />
-        </div>
-      )}
+          </div>
+        )}
 
       <TodoFilter
         filterType={filterType}
@@ -169,9 +205,7 @@ const App = ({ initCounter }) => {
   );
 };
 
-export default memo(App, (prevProp, nextProp) => {
-  return true;
-});
+export default memo(App, (prevProp, nextProp) => true);
 
 // class App extends PureComponent {
 //   todoInputRef = createRef(null);
