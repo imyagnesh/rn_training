@@ -7,6 +7,7 @@
     height: 100vh;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     & .wrapper {
         display: flex;
         padding: 10px;
@@ -15,3 +16,6 @@
         }
     }
 }
+.pding {  
+  padding-left: 500px;  
+} 
