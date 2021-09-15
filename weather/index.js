@@ -1,5 +1,6 @@
 import React, { createRef, PureComponent } from 'react';
 import './weather.scss';
+import axiosInstance from '../utils/axiosInstance';
 
 class WeatherApp extends PureComponent {
   weatherInputRef = createRef(null);
@@ -7,20 +8,23 @@ class WeatherApp extends PureComponent {
   state = {
     cities: [],
     filterCities: [],
+    status: [],
   };
 
   componentDidMount = async () => {
+    const requestType = 'fetch_weather';
     try {
-      const res = await fetch(
-        'http://localhost:3000/weather',
-      );
-      const json = await res.json();
-      console.log(json);
+      this.setApiRequest(requestType);
+      const res = await axiosInstance.get('weather');
       this.setState({
-        cities: json,
+        cities: res,
       });
+      this.setApiResponse(requestType, 'success');
     } catch (error) {
       console.log(error);
+      this.setApiResponse(requestType, 'fail');
+    } finally {
+      this.setIdle(requestType);
     }
   };
 
@@ -37,8 +41,56 @@ class WeatherApp extends PureComponent {
     console.log(json);
   };
 
+  setApiRequest = (requestType, id) => {
+    this.setState(({ status }) => ({
+      status: [
+        ...status,
+        { status: `${requestType}_request`, id },
+      ],
+    }));
+  };
+
+  setApiResponse = (requestType, type, id) => {
+    this.setState(({ status }) => {
+      const index = status.findIndex(x => {
+        const [, requestName] =
+          /(.*)_(request|success|fail)/.exec(x.status);
+        if (id) {
+          return requestName === requestType && x.id === id;
+        }
+        return requestName === requestType;
+      });
+      return {
+        status: [
+          ...status.slice(0, index),
+          { status: `${requestType}_${type}` },
+          ...status.slice(index + 1),
+        ],
+      };
+    });
+  };
+
+  setIdle = (requestType, id) => {
+    this.setState(({ status }) => {
+      const index = status.findIndex(x => {
+        const [, requestName] =
+          /(.*)_(request|success|fail)/.exec(x.status);
+        if (id) {
+          return requestName === requestType && x.id === id;
+        }
+        return requestName === requestType;
+      });
+      return {
+        status: [
+          ...status.slice(0, index),
+          ...status.slice(index + 1),
+        ],
+      };
+    });
+  };
+
   render() {
-    const { weather, filterCities } = this.state;
+    const { filterCities } = this.state;
 
     return (
       <div className="container">
@@ -51,7 +103,8 @@ class WeatherApp extends PureComponent {
         </div>
         {filterCities.map(item => (
           <span key={item.id}>
-            Today's weather in {item.city} is {item.temp}°C
+            Today's weather in {item.city} is {item.temp}
+            °C
           </span>
         ))}
       </div>
