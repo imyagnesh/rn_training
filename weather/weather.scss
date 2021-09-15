@@ -1,0 +1,21 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+.container {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    & .wrapper {
+        display: flex;
+        padding: 10px;
+        & select {
+            margin: 0 10px;
+        }
+    }
+}
+.pding {  
+  padding-left: 500px;  
+} 
