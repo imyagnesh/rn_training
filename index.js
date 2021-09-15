@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './app';
-// import WeatherApp from './weather';
+import WeatherApp from './weather';
 
 ReactDOM.render(
-  <App initCounter={3} />,
+  <WeatherApp />,
   document.getElementById('root'),
 );
