@@ -6,31 +6,56 @@
       "id": 1
     },
     {
-      "text": "assdfas",
+      "text": "learn react class one",
       "isDone": true,
       "id": 2
+    },
+    {
+      "text": "learn react class two",
+      "isDone": true,
+      "id": 3
+    },
+    {
+      "text": "learn react class three",
+      "isDone": true,
+      "id": 4
     }
   ],
   "weather": [
     {
       "id": 1,
-      "city": "ahmedabad",
-      "temp": 25
+      "city": "madurai",
+      "temp": 26
     },
     {
-      "id": 1,
-      "city": "ahmed nagar",
+      "id": 2,
+      "city": "trichy",
+      "temp": 27
+    },
+    {
+      "id": 3,
+      "city": "karur",
+      "temp": 23
+    },
+    {
+      "id": 4,
+      "city": "chennai",
       "temp": 28
     },
     {
-      "id": 1,
-      "city": "pune",
-      "temp": 20
+      "id": 5,
+      "city": "bangluru",
+      "temp": 21
     },
     {
-      "id": 1,
-      "city": "bangluru",
-      "temp": 18
+      "id": 6,
+      "city": "salem",
+      "temp": 25
+    },
+    {
+      "id": 7,
+      "city": "namakkal",
+      "temp": 29
     }
   ]
 }
