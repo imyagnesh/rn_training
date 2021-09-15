@@ -18,19 +18,29 @@
       "temp": 25
     },
     {
-      "id": 1,
+      "id": 2,
       "city": "ahmed nagar",
       "temp": 28
     },
     {
-      "id": 1,
+      "id": 3,
       "city": "pune",
       "temp": 20
     },
     {
-      "id": 1,
+      "id": 4,
       "city": "bangluru",
       "temp": 18
+    },
+    {
+      "id": 5,
+      "city": "delhi",
+      "temp": 36
+    },
+    {
+      "id": 5,
+      "city": "chennai",
+      "temp": 36
     }
   ]
 }
