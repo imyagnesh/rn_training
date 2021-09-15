@@ -42,7 +42,7 @@ class WeatherApp extends PureComponent {
 
     return (
       <div >
-        <h3>Type a City:</h3>
+        <h3>City:</h3>
         <div >
           <input type="text" ref={this.weatherInputRef} />
           <button type="button" onClick={this.checkWeather}>
