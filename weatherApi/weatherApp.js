@@ -1,5 +1,6 @@
 import React, { PureComponent, createRef } from 'react';
 import '../weather/weather.scss';
+import axiosInstance from '../utils/axiosInstance';
 
 class App extends PureComponent {
     todoInputRef = createRef(null);
@@ -13,10 +14,9 @@ state = {
 
 componentDidMount = async () => {
   try {
-    const res = await fetch('http://localhost:3000/weather');
-    const json = await res.json();
+    const res = await axiosInstance.get('weather');
     this.setState({
-      weatherData: json,
+      weatherData: res,
     });
   } catch (error) {
     this.setState({
