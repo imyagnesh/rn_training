@@ -1,30 +1,38 @@
-import React, { PureComponent, createRef } from 'react';
+import React, {
+  PureComponent,
+  createRef,
+  useState,
+  useEffect,
+  useRef,
+  memo,
+} from 'react';
 import './app.scss';
 import TodoFilter from './todo/todoFilter';
 import TodoForm from './todo/todoForm';
 import TodoList from './todo/todoList';
+import axiosInstance from './utils/axiosInstance';
 
-class App extends PureComponent {
-  todoInputRef = createRef(null);
+const _limit = 10;
 
-  state = {
-    todoList: [],
-    filterType: 'all',
-    status: [],
+// react.js v > 16.8
+
+const App = ({ initCounter }) => {
+  const [todoList, setTodoList] = useState([]);
+  const [filterType, setFilterType] = useState('all');
+  const [status, setStatus] = useState([]);
+  const [page, setPage] = useState(1);
+  const todoInputRef = useRef(null);
+
+  const setApiRequest = (requestType, id) => {
+    setStatus(val => [
+      ...val,
+      { status: `${requestType}_request`, id },
+    ]);
   };
 
-  setApiRequest = (requestType, id) => {
-    this.setState(({ status }) => ({
-      status: [
-        ...status,
-        { status: `${requestType}_request`, id },
-      ],
-    }));
-  };
-
-  setApiResponse = (requestType, type, id) => {
-    this.setState(({ status }) => {
-      const index = status.findIndex(x => {
+  const setApiResponse = (requestType, type, id) => {
+    setStatus(val => {
+      const index = val.findIndex(x => {
         const [, requestName] =
           /(.*)_(request|success|fail)/.exec(x.status);
         if (id) {
@@ -32,19 +40,17 @@ class App extends PureComponent {
         }
         return requestName === requestType;
       });
-      return {
-        status: [
-          ...status.slice(0, index),
-          { status: `${requestType}_${type}` },
-          ...status.slice(index + 1),
-        ],
-      };
+      return [
+        ...val.slice(0, index),
+        { status: `${requestType}_${type}` },
+        ...val.slice(index + 1),
+      ];
     });
   };
 
-  setIdle = (requestType, id) => {
-    this.setState(({ status }) => {
-      const index = status.findIndex(x => {
+  const setIdle = (requestType, id) => {
+    setStatus(val => {
+      const index = val.findIndex(x => {
         const [, requestName] =
           /(.*)_(request|success|fail)/.exec(x.status);
         if (id) {
@@ -52,180 +58,412 @@ class App extends PureComponent {
         }
         return requestName === requestType;
       });
-      return {
-        status: [
-          ...status.slice(0, index),
-          ...status.slice(index + 1),
-        ],
-      };
+      return [
+        ...val.slice(0, index),
+        ...val.slice(index + 1),
+      ];
     });
   };
 
-  componentDidMount = async () => {
+  const loadData = async () => {
     const requestType = 'fetch_todo';
     try {
-      this.setApiRequest(requestType);
-
-      const res = await fetch(
-        'http://localhost:3000/todoList',
-      );
-      const json = await res.json();
-      this.setState({
-        todoList: json,
+      setApiRequest(requestType);
+      let params = {
+        _page: page,
+        _limit,
+      };
+      if (filterType !== 'all') {
+        params = {
+          isDone: filterType === 'completed',
+        };
+      }
+      // get token
+      const res = await axiosInstance.get('todoList', {
+        params,
       });
-      this.setApiResponse(requestType, 'success');
+      setTodoList(res);
+      setApiResponse(requestType, 'success');
     } catch (error) {
-      this.setApiResponse(requestType, 'fail');
+      setApiResponse(requestType, 'fail');
     } finally {
-      this.setIdle(requestType);
+      setIdle(requestType);
     }
   };
 
-  addTodo = async () => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const addTodo = async () => {
     const requestType = 'add_todo';
     try {
-      this.setApiRequest(requestType);
-      const res = await fetch(
-        'http://localhost:3000/todoList',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            text: this.todoInputRef.current.value,
-            isDone: false,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        },
-      );
+      setApiRequest(requestType);
+      const res = await axiosInstance.post('todoList', {
+        text: todoInputRef.current.value,
+        isDone: false,
+      });
 
-      const json = await res.json();
+      setTodoList(val => [...val, res]);
+      setFilterType('all');
 
-      this.setState(
-        ({ todoList }) => ({
-          todoList: [...todoList, json],
-          filterType: 'all',
-          loading: false,
-        }),
-        () => {
-          this.todoInputRef.current.value = '';
-        },
-      );
+      todoInputRef.current.value = '';
 
-      this.setApiResponse(requestType, 'success');
+      setApiResponse(requestType, 'success');
     } catch (error) {
-      this.setApiResponse(requestType, 'fail');
+      setApiResponse(requestType, 'fail');
     } finally {
-      this.setIdle(requestType);
+      setIdle(requestType);
     }
   };
 
-  toggleCompleteTodo = async item => {
+  const toggleCompleteTodo = async (item) => {
+    console.log(item);
     const requestType = 'update_todo';
     try {
-      this.setApiRequest(requestType, item.id);
-      const res = await fetch(
-        `http://localhost:3000/todoList/${item.id}`,
+      setApiRequest(requestType, item.id);
+      const res = await axiosInstance.put(
+        `todoList/${item.id}`,
         {
-          method: 'PUT',
-          body: JSON.stringify({
-            ...item,
-            isDone: !item.isDone,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
+          ...item,
+          isDone: !item.isDone,
         },
       );
 
-      const json = await res.json();
-
-      const { todoList } = this.state;
+      // const { todoList } = this.state;
 
       const index = todoList.findIndex(
         x => x.id === item.id,
       );
-
-      this.setState(state => ({
-        todoList: [
-          ...state.todoList.slice(0, index),
-          json,
-          ...state.todoList.slice(index + 1),
-        ],
-        loading: false,
-      }));
-      this.setApiResponse(requestType, 'success', item.id);
+      // setTodoList( val => ;)
+      setTodoList(val => [...val.slice(0, index), res, ...val.slice(index + 1)])
+      setApiResponse(requestType, 'success', item.id);
     } catch (error) {
-      this.setApiResponse(requestType, 'fail', item.id);
+      setApiResponse(requestType, 'fail', item.id);
     } finally {
-      this.setIdle(requestType, item.id);
+      setIdle(requestType, item.id);
     }
   };
 
-  deleteTodo = async item => {
+  const deleteTodo = async (item) => {
     const requestType = 'delete_todo';
     try {
-      this.setApiRequest(requestType, item.id);
-      await fetch(
-        `http://localhost:3000/todoList/${item.id}`,
-        {
-          method: 'DELETE',
-        },
-      );
-      this.setState(({ todoList }) => ({
-        todoList: todoList.filter(x => x.id !== item.id),
-      }));
-      this.setApiResponse(requestType, 'success', item.id);
+      setApiRequest(requestType, item.id);
+      await axiosInstance.delete(`todoList/${item.id}`);
+      setTodoList(val => val.filter(x => x.id !== item.id))
+      // this.setState(({ todoList }) => ({
+      //   todoList: todoList.filter(x => x.id !== item.id),
+      // }));
+      setApiResponse(requestType, 'success', item.id);
     } catch (error) {
-      this.setApiResponse(requestType, 'fail', item.id);
+      setApiResponse(requestType, 'fail', item.id);
     } finally {
-      this.setIdle(requestType, item.id);
+      setIdle(requestType, item.id);
     }
   };
 
-  filterTodo = event => {
-    this.setState({
-      filterType: event.target.name,
-    });
-  };
+  const pagination = async () => { };
 
-  render() {
-    const { todoList, filterType, status } = this.state;
+  const filterTodo = async () => { };
 
-    return (
-      <div className="container">
-        <h1>Todo App</h1>
-        <TodoForm
-          status={status}
-          ref={this.todoInputRef}
-          addTodo={this.addTodo}
-        />
-        {status.some(
-          x => x.status === 'fetch_todo_request',
-        ) ? (
+  return (
+    <div className="container">
+      <h1>Todo App</h1>
+      <TodoForm
+        status={status}
+        ref={todoInputRef}
+        addTodo={addTodo}
+      />
+      {status.some(
+        x => x.status === 'fetch_todo_request',
+      ) ? (
           <h1>Loading Record...</h1>
         ) : (
-          <TodoList
-            status={status}
-            todoList={todoList}
-            filterType={filterType}
-            toggleCompleteTodo={this.toggleCompleteTodo}
-            deleteTodo={this.deleteTodo}
-          />
+          <div style={{ width: '100%', flex: 1 }}>
+            <button
+              type="button"
+              name="previous"
+              onClick={pagination}>
+              Prev
+          </button>
+            <button
+              type="button"
+              name="next"
+              onClick={pagination}>
+              Next
+          </button>
+            <TodoList
+              status={status}
+              todoList={todoList}
+              filterType={filterType}
+              toggleCompleteTodo={toggleCompleteTodo}
+              deleteTodo={deleteTodo}
+            />
+          </div>
         )}
 
-        <TodoFilter
-          filterType={filterType}
-          filterTodo={this.filterTodo}
-        />
-      </div>
-    );
-  }
-}
+      <TodoFilter
+        filterType={filterType}
+        filterTodo={filterTodo}
+      />
+    </div>
+  );
+};
 
-export default App;
+export default memo(App, (prevProp, nextProp) => {
+  return true;
+});
+
+// class App extends PureComponent {
+//   todoInputRef = createRef(null);
+
+//   state = {
+//     todoList: [],
+//     filterType: 'all',
+//     status: [],
+//     page: 1,
+//   };
+
+//   setApiRequest = (requestType, id) => {
+//     this.setState(({ status }) => ({
+//       status: [
+//         ...status,
+//         { status: `${requestType}_request`, id },
+//       ],
+//     }));
+//   };
+
+//   setApiResponse = (requestType, type, id) => {
+//     this.setState(({ status }) => {
+//       const index = status.findIndex(x => {
+//         const [, requestName] =
+//           /(.*)_(request|success|fail)/.exec(x.status);
+//         if (id) {
+//           return requestName === requestType && x.id === id;
+//         }
+//         return requestName === requestType;
+//       });
+//       return {
+//         status: [
+//           ...status.slice(0, index),
+//           { status: `${requestType}_${type}` },
+//           ...status.slice(index + 1),
+//         ],
+//       };
+//     });
+//   };
+
+//   setIdle = (requestType, id) => {
+//     this.setState(({ status }) => {
+//       const index = status.findIndex(x => {
+//         const [, requestName] =
+//           /(.*)_(request|success|fail)/.exec(x.status);
+//         if (id) {
+//           return requestName === requestType && x.id === id;
+//         }
+//         return requestName === requestType;
+//       });
+//       return {
+//         status: [
+//           ...status.slice(0, index),
+//           ...status.slice(index + 1),
+//         ],
+//       };
+//     });
+//   };
+
+//   componentDidMount = () => {
+//     this.loadData();
+//   };
+
+//   loadData = async () => {
+//     const requestType = 'fetch_todo';
+//     try {
+//       this.setApiRequest(requestType);
+
+//       const { filterType, page } = this.state;
+//       let params = {
+//         _page: page,
+//         _limit,
+//       };
+//       if (filterType !== 'all') {
+//         params = {
+//           isDone: filterType === 'completed',
+//         };
+//       }
+
+//       // get token
+
+//       const res = await axiosInstance.get('todoList', {
+//         params,
+//       });
+
+//       this.setState({
+//         todoList: res,
+//       });
+//       this.setApiResponse(requestType, 'success');
+//     } catch (error) {
+//       this.setApiResponse(requestType, 'fail');
+//     } finally {
+//       this.setIdle(requestType);
+//     }
+//   };
+
+//   addTodo = async () => {
+//     const requestType = 'add_todo';
+//     try {
+//       this.setApiRequest(requestType);
+//       const res = await axiosInstance.post('todoList', {
+//         text: this.todoInputRef.current.value,
+//         isDone: false,
+//       });
+
+//       this.setState(
+//         ({ todoList }) => ({
+//           todoList: [...todoList, res],
+//           filterType: 'all',
+//         }),
+//         () => {
+//           this.todoInputRef.current.value = '';
+//         },
+//       );
+
+//       this.setApiResponse(requestType, 'success');
+//     } catch (error) {
+//       this.setApiResponse(requestType, 'fail');
+//     } finally {
+//       this.setIdle(requestType);
+//     }
+//   };
+
+//   toggleCompleteTodo = async item => {
+//     const requestType = 'update_todo';
+//     try {
+//       this.setApiRequest(requestType, item.id);
+//       const res = await axiosInstance.put(
+//         `todoList/${item.id}`,
+//         {
+//           ...item,
+//           isDone: !item.isDone,
+//         },
+//       );
+
+//       const { todoList } = this.state;
+
+//       const index = todoList.findIndex(
+//         x => x.id === item.id,
+//       );
+
+//       this.setState(state => ({
+//         todoList: [
+//           ...state.todoList.slice(0, index),
+//           res,
+//           ...state.todoList.slice(index + 1),
+//         ],
+//       }));
+//       this.setApiResponse(requestType, 'success', item.id);
+//     } catch (error) {
+//       this.setApiResponse(requestType, 'fail', item.id);
+//     } finally {
+//       this.setIdle(requestType, item.id);
+//     }
+//   };
+
+//   deleteTodo = async item => {
+//     const requestType = 'delete_todo';
+//     try {
+//       this.setApiRequest(requestType, item.id);
+//       await axiosInstance.delete(`todoList/${item.id}`);
+//       this.setState(({ todoList }) => ({
+//         todoList: todoList.filter(x => x.id !== item.id),
+//       }));
+//       this.setApiResponse(requestType, 'success', item.id);
+//     } catch (error) {
+//       this.setApiResponse(requestType, 'fail', item.id);
+//     } finally {
+//       this.setIdle(requestType, item.id);
+//     }
+//   };
+
+//   filterTodo = event => {
+//     this.setState(
+//       {
+//         filterType: event.target.name,
+//       },
+//       () => {
+//         this.loadData();
+//       },
+//     );
+//   };
+
+//   pagination = async event => {
+//     this.setState(
+//       ({ page }) => {
+//         const btnType = event.target.name;
+//         let changedPage = 0;
+//         if (btnType === 'previous' && page > 2) {
+//           changedPage = page - 1;
+//         }
+//         if (btnType === 'next') {
+//           changedPage = page + 1;
+//         }
+//         return {
+//           page: changedPage,
+//         };
+//       },
+//       () => {
+//         this.loadData();
+//       },
+//     );
+//   };
+
+//   render() {
+//     const { todoList, filterType, status } = this.state;
+
+//     return (
+//       <div className="container">
+//         <h1>Todo App</h1>
+//         <TodoForm
+//           status={status}
+//           ref={this.todoInputRef}
+//           addTodo={this.addTodo}
+//         />
+//         {status.some(
+//           x => x.status === 'fetch_todo_request',
+//         ) ? (
+//           <h1>Loading Record...</h1>
+//         ) : (
+//           <div style={{ width: '100%' }}>
+//             <button
+//               type="button"
+//               name="previous"
+//               onClick={this.pagination}>
+//               Prev
+//             </button>
+//             <button
+//               type="button"
+//               name="next"
+//               onClick={this.pagination}>
+//               Next
+//             </button>
+//             <TodoList
+//               status={status}
+//               todoList={todoList}
+//               filterType={filterType}
+//               toggleCompleteTodo={this.toggleCompleteTodo}
+//               deleteTodo={this.deleteTodo}
+//             />
+//           </div>
+//         )}
+
+//         <TodoFilter
+//           filterType={filterType}
+//           filterTodo={this.filterTodo}
+//         />
+//       </div>
+//     );
+//   }
+// }
 
 // life cycle methods
 
@@ -258,7 +496,7 @@ export default App;
 
 // 3. render
 
-// 4. getSnapShoptBeforUpdate
+// 4. getSnapShoptBeforUpdate // Not possieble in hook
 // -> take snapshot of UI and pass result to ComponentDidUpdate
 
 // 5. componentDidIUpdate
@@ -271,8 +509,8 @@ export default App;
 
 // error
 
-// 1. GetDerivedStateFromError
+// 1. GetDerivedStateFromError // not possible in hook
 // -> derive state value based on error
 
-// 2. componentDidCatch
+// 2. componentDidCatch // not possible in hook
 // log error on server

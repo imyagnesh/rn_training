@@ -2,6 +2,7 @@ import React, { PureComponent, createRef } from 'react';
 import WeatherForm from './weatherForm';
 import WeatherList from './weatherList';
 import './weather.scss';
+import axiosInstance from '../utils/axiosInstance';
 
 class WeatherApi extends PureComponent {
     weatherInputRef = createRef(null);
@@ -64,12 +65,13 @@ class WeatherApi extends PureComponent {
         try {
             this.setApiRequest(requestType);
 
-            const res = await fetch(
-                'http://localhost:3000/weather',
-            );
-            const json = await res.json();
+            // const res = await fetch(
+            //     'http://localhost:3000/weather',
+            // );
+            const res = await axiosInstance.get('weather')
+            // const json = await res.json();
             this.setState({
-                weatherList: json,
+                weatherList: res,
             });
             this.setApiResponse(requestType, 'success');
         } catch (error) {
