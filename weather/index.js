@@ -1,26 +1,63 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, createRef } from 'react';
+import './weather.scss';
 
-class WeatherApp extends PureComponent {
+class Weather extends PureComponent {
+
+  weatherInputRef = createRef(null);
+
   state = {
-    cities: [
+    weatherList: [
       {
-        name: 'ahmedabad',
-        temp: 38,
+        cityName: "chennai",
+        temp: 32
       },
       {
-        name: 'pune',
-        temp: 30,
+        cityName: "bangalore",
+        temp: 28
       },
+      {
+        cityName: "pune",
+        temp: 29
+      },
+      {
+        cityName: "delhi",
+        temp: 21
+      },
+      {
+        cityName: "nellai",
+        temp: 33
+      }
     ],
+    selectedOption: null,
+    selectedVlaue: null,
+
+  };
+
+  handleChange = selectedOption => {
+    console.log(`Option selected:`, selectedOption.target.value);
+    this.setState({ selectedOption: selectedOption, selectedVlaue: selectedOption.target.value });
   };
 
   render() {
+    const { weatherList, selectedVlaue } = this.state;
     return (
-      <div>
-        <h1>Weather App</h1>
+      <div className="container">
+        <h1> Weather App </h1>
+        <div className="weather-form">
+          <select name="weatherList" value={weatherList} onChange={this.handleChange}>
+            {weatherList.map((e, key) => {
+              return <option key={key} value={e.temp}>{e.cityName}</option>;
+            })}
+          </select>
+          <button onClick={this.handleChange}> Weather Report </button>
+        </div>
+        <div className="report" >
+          {selectedVlaue ? <h2> Weather report for city is <span>{selectedVlaue}</span> </h2> : null}
+        </div>
       </div>
     );
   }
+
 }
 
-export default WeatherApp;
+export default Weather;

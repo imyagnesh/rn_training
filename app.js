@@ -117,13 +117,54 @@ const App = ({ initCounter }) => {
     }
   };
 
-  const toggleCompleteTodo = async () => {};
+  const toggleCompleteTodo = async (item) => {
+    console.log(item);
+    const requestType = 'update_todo';
+    try {
+      setApiRequest(requestType, item.id);
+      const res = await axiosInstance.put(
+        `todoList/${item.id}`,
+        {
+          ...item,
+          isDone: !item.isDone,
+        },
+      );
 
-  const deleteTodo = async () => {};
+      // const { todoList } = this.state;
 
-  const pagination = async () => {};
+      const index = todoList.findIndex(
+        x => x.id === item.id,
+      );
+      // setTodoList( val => ;)
+      setTodoList(val => [...val.slice(0, index), res, ...val.slice(index + 1)])
+      setApiResponse(requestType, 'success', item.id);
+    } catch (error) {
+      setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      setIdle(requestType, item.id);
+    }
+  };
 
-  const filterTodo = async () => {};
+  const deleteTodo = async (item) => {
+    const requestType = 'delete_todo';
+    try {
+      setApiRequest(requestType, item.id);
+      await axiosInstance.delete(`todoList/${item.id}`);
+      setTodoList(val => val.filter(x => x.id !== item.id))
+      // this.setState(({ todoList }) => ({
+      //   todoList: todoList.filter(x => x.id !== item.id),
+      // }));
+      setApiResponse(requestType, 'success', item.id);
+    } catch (error) {
+      setApiResponse(requestType, 'fail', item.id);
+    } finally {
+      setIdle(requestType, item.id);
+    }
+  };
+
+  const pagination = async () => { };
+
+  const filterTodo = async () => { };
 
   return (
     <div className="container">
@@ -136,30 +177,30 @@ const App = ({ initCounter }) => {
       {status.some(
         x => x.status === 'fetch_todo_request',
       ) ? (
-        <h1>Loading Record...</h1>
-      ) : (
-        <div style={{ width: '100%', flex: 1 }}>
-          <button
-            type="button"
-            name="previous"
-            onClick={pagination}>
-            Prev
+          <h1>Loading Record...</h1>
+        ) : (
+          <div style={{ width: '100%', flex: 1 }}>
+            <button
+              type="button"
+              name="previous"
+              onClick={pagination}>
+              Prev
           </button>
-          <button
-            type="button"
-            name="next"
-            onClick={pagination}>
-            Next
+            <button
+              type="button"
+              name="next"
+              onClick={pagination}>
+              Next
           </button>
-          <TodoList
-            status={status}
-            todoList={todoList}
-            filterType={filterType}
-            toggleCompleteTodo={toggleCompleteTodo}
-            deleteTodo={deleteTodo}
-          />
-        </div>
-      )}
+            <TodoList
+              status={status}
+              todoList={todoList}
+              filterType={filterType}
+              toggleCompleteTodo={toggleCompleteTodo}
+              deleteTodo={deleteTodo}
+            />
+          </div>
+        )}
 
       <TodoFilter
         filterType={filterType}
