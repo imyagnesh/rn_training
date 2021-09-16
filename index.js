@@ -4,6 +4,11 @@ import ReactDOM from 'react-dom';
 import WeatherApp from './weather';
 
 ReactDOM.render(
-  <App initCounter={3} />,
+  <WeatherApp />,
   document.getElementById('root'),
 );
+
+// ReactDOM.render(
+//   <App initCounter={3} />,
+//   document.getElementById('root'),
+// );
