@@ -31,6 +31,6 @@ axiosInstance.interceptors.response.use(
         // Do something with response error
 
         Promise.reject(error),
-);
+);  
 
 export default axiosInstance;
